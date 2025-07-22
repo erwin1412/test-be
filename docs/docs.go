@@ -511,8 +511,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is a simple API for managing car rentals.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
