@@ -3,6 +3,7 @@ package repository
 import (
 	"rentalapi/config"
 	"rentalapi/model"
+	"time"
 )
 
 type OrderRepository interface {
@@ -11,7 +12,7 @@ type OrderRepository interface {
 	Create(order model.Order) (model.Order, error)
 	Update(order model.Order) (model.Order, error)
 	Delete(id int) error
-	IsCarAvailable(carID int, pickupDate, dropoffDate string) (bool, error)
+	IsCarAvailable(carID int, pickupDate, dropoffDate time.Time) (bool, error)
 }
 type orderRepository struct{}
 
@@ -43,14 +44,19 @@ func (r *orderRepository) GetByID(id int) (model.Order, error) {
 	return order, nil
 }
 
-func (r *orderRepository) IsCarAvailable(carID int, pickupDate, dropoffDate string) (bool, error) {
+func (r *orderRepository) IsCarAvailable(
+	carID int,
+	pickupDate, dropoffDate time.Time,
+) (bool, error) {
+
 	var count int
 	err := config.DB.QueryRow(`
 		SELECT COUNT(*)
 		FROM orders
-		WHERE car_id = $1
+		WHERE car_id = $1 
 		AND NOT ($3 < pickup_date OR $2 > dropoff_date)
-	`, carID, pickupDate, dropoffDate).Scan(&count)
+	`,
+		carID, pickupDate, dropoffDate).Scan(&count)
 
 	if err != nil {
 		return false, err

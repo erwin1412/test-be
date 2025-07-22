@@ -28,15 +28,29 @@ func (s *orderService) GetOrderByID(id int) (model.Order, error) {
 }
 
 func (s *orderService) CreateOrder(order model.Order) (model.Order, error) {
-	isAvailable, err := s.repo.IsCarAvailable(order.CarID, order.PickupDate.Format("2006-01-02"), order.DropoffDate.Format("2006-01-02"))
+	if order.PickupDate.Before(order.OrderDate) {
+		return model.Order{}, errors.New("pickup_date must be same or after order_date")
+	}
+
+	if order.DropoffDate.Before(order.PickupDate) {
+		return model.Order{}, errors.New("dropoff_date must be same or after pickup_date")
+	}
+
+	isAvailable, err := s.repo.IsCarAvailable(
+		order.CarID,
+		order.PickupDate,
+		order.DropoffDate,
+	)
 	if err != nil {
 		return model.Order{}, err
 	}
 	if !isAvailable {
 		return model.Order{}, errors.New("car is not available for the selected dates")
 	}
+
 	return s.repo.Create(order)
 }
+
 func (s *orderService) UpdateOrder(order model.Order) (model.Order, error) {
 	return s.repo.Update(order)
 }
