@@ -3,4 +3,5 @@
 3. run the collection
 4. check the result in Postman
 
-
+Swagger Link
+http://localhost:8082/swagger/index.html

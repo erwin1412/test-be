@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"rentalapi/model"
 	"rentalapi/repository"
 )
@@ -27,6 +28,13 @@ func (s *orderService) GetOrderByID(id int) (model.Order, error) {
 }
 
 func (s *orderService) CreateOrder(order model.Order) (model.Order, error) {
+	isAvailable, err := s.repo.IsCarAvailable(order.CarID, order.PickupDate.Format("2006-01-02"), order.DropoffDate.Format("2006-01-02"))
+	if err != nil {
+		return model.Order{}, err
+	}
+	if !isAvailable {
+		return model.Order{}, errors.New("car is not available for the selected dates")
+	}
 	return s.repo.Create(order)
 }
 func (s *orderService) UpdateOrder(order model.Order) (model.Order, error) {

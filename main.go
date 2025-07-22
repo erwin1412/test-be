@@ -6,9 +6,17 @@ import (
 	"rentalapi/repository"
 	"rentalapi/service"
 
+	_ "rentalapi/docs"
+
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// @title Rental Mobil API
+// @version 1.0
+// @description This is a simple API for managing car rentals.
+// @host localhost:8082
+// @BasePath /
 func main() {
 	// Initialize Echo framework
 	e := echo.New()
@@ -35,6 +43,8 @@ func main() {
 	e.POST("/orders", orderHandler.Create)
 	e.PUT("/orders/:id", orderHandler.Update)
 	e.DELETE("/orders/:id", orderHandler.Delete)
+	// Swagger documentation route
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	// Start the server
 	e.Logger.Fatal(e.Start(":8082"))
 }

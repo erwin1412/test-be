@@ -11,6 +11,7 @@ type OrderRepository interface {
 	Create(order model.Order) (model.Order, error)
 	Update(order model.Order) (model.Order, error)
 	Delete(id int) error
+	IsCarAvailable(carID int, pickupDate, dropoffDate string) (bool, error)
 }
 type orderRepository struct{}
 
@@ -41,7 +42,25 @@ func (r *orderRepository) GetByID(id int) (model.Order, error) {
 	}
 	return order, nil
 }
+
+func (r *orderRepository) IsCarAvailable(carID int, pickupDate, dropoffDate string) (bool, error) {
+	var count int
+	err := config.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM orders
+		WHERE car_id = $1
+		AND NOT ($3 < pickup_date OR $2 > dropoff_date)
+	`, carID, pickupDate, dropoffDate).Scan(&count)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count == 0, nil
+}
+
 func (r *orderRepository) Create(order model.Order) (model.Order, error) {
+
 	err := config.DB.QueryRow("INSERT INTO orders (car_id, order_date, pickup_date, dropoff_date, pickup_location, dropoff_location) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", order.CarID, order.OrderDate, order.PickupDate, order.DropoffDate, order.PickupLocation, order.DropoffLocation).Scan(&order.ID)
 	if err != nil {
 		return model.Order{}, err
