@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_car
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: cars_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cars_db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: go_cars_api
+    depends_on:
+      - db
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: cars_db
+    restart: always
+
+volumes:
+  cars_db_data:
